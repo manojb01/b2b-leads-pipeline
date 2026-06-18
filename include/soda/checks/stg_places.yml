@@ -1,0 +1,31 @@
+# Checks on STAGING.STG_PLACES after the stg_places dbt model runs
+# Purpose: data quality checks — are the fields complete, valid, and correctly parsed?
+# place_id and duplicate checks live here, not at raw, because raw is an immutable
+# source copy. We validate the data after our transformations have run.
+
+checks for STG_PLACES:
+  # place_id is the primary key — must be present in every record
+  - missing_count(place_id) = 0:
+      name: No missing place_ids
+
+  # Duplicates are expected in raw (H3 hexagon overlap) and resolved by the MERGE.
+  # By staging they must be gone — if not, the MERGE logic broke.
+  - duplicate_count(place_id) = 0:
+      name: No duplicate place_ids after MERGE
+
+  # Area must be extracted from every record
+  - missing_count(area) = 0:
+      name: No missing areas
+
+  # Area must not be a generic street descriptor — these appear when Google Places
+  # encodes a sub-locality type (Line, Road, Lane) as the last address segment
+  # before the city. stg_places.sql handles the known cases with a fallback; this
+  # check catches any new ones that haven't been added to the blocklist yet.
+  - invalid_count(area) = 0:
+      invalid values: ['Line', 'Road', 'Lane', 'Main', 'Cross', 'Street', 'Extension', 'India']
+      name: Area is not a generic street descriptor or country name
+
+  # Area must be a meaningful name — single-character or empty strings are parse failures
+  - invalid_count(area) = 0:
+      valid min length: 3
+      name: Area name has meaningful length

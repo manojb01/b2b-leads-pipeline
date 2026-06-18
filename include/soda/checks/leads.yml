@@ -1,0 +1,41 @@
+# Checks on PROD.LEADS after dbt transformations
+# Purpose: ensure clean, business-ready data before dashboard and CSV export
+
+checks for LEADS:
+  # Must have leads — if 0 rows something went badly wrong
+  - row_count > 0:
+      name: Leads table has records
+
+  # place_id is our primary key — must be present and unique
+  - missing_count(place_id) = 0:
+      name: No missing place_ids
+  - duplicate_count(place_id) = 0:
+      name: No duplicate place_ids (dedup worked correctly)
+
+  # Business name must always be present
+  - missing_count(name) = 0:
+      name: No missing business names
+
+  # No permanently closed businesses should have leaked through
+  - invalid_count(business_status) = 0:
+      valid values: [OPERATIONAL, CLOSED_TEMPORARILY]
+      name: No permanently closed businesses in leads
+
+  # Phone numbers that exist must be in E.164 format (+91XXXXXXXXXX)
+  - invalid_percent(phone_clean) < 5:
+      valid regex: '^\+91\d{10}$'
+      name: Phone numbers in E.164 format
+
+  # Ratings must be between 0 and 5
+  - invalid_count(rating) = 0:
+      valid min: 0
+      valid max: 5
+      name: Ratings within valid range (0-5)
+
+  # Area must always be extracted — parsed from formattedAddress via split_part
+  - missing_count(area) = 0:
+      name: No missing areas
+
+  # City must always be Hyderabad in dev
+  - missing_count(city) = 0:
+      name: No missing cities

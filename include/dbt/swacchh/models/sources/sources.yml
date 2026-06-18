@@ -1,0 +1,23 @@
+version: 2
+
+sources:
+  - name: raw
+    database: SWACCHH_LEADS
+    schema: RAW
+    tables:
+      - name: places
+        description: "Raw Google Places API data loaded by Airflow. Each row is a JSON object stored as VARIANT."
+        config:
+          loaded_at_field: INGESTED_AT
+          freshness:
+            warn_after: {count: 1, period: day}
+            error_after: {count: 2, period: day}
+        columns:
+          - name: RAW_DATA
+            description: "Full Google Places API response as VARIANT (JSON)."
+            tests:
+              - not_null
+          - name: INGESTED_AT
+            description: "Timestamp when the record was loaded into Snowflake."
+            tests:
+              - not_null

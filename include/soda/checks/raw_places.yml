@@ -1,0 +1,24 @@
+# Checks on RAW.PLACES immediately after load_to_snowflake
+# Purpose: validate ingestion quality, completeness, and freshness.
+# Hard-coded row count ranges are avoided — they break as data grows day to day.
+# Anomaly detection is commented out until 4+ historical scans exist (Soda requirement).
+
+checks for PLACES:
+  # Completeness — did ingestion produce anything at all?
+  - row_count > 0:
+      name: Raw table has records
+
+  # Freshness — data must have been loaded within the last 24 hours
+  # Catches silent scheduler failures where the DAG didn't run
+  - freshness(INGESTED_AT) < 1d:
+      name: Data is fresh — loaded within last 24 hours
+
+  # Ingestion quality — ingested_at is set by our loader, not the API
+  # If missing, the load code itself broke
+  - missing_count(INGESTED_AT) = 0:
+      name: No missing ingested_at timestamps
+
+  # Anomaly detection — uncomment once 4+ historical scans have been collected
+  # Soda's ML baseline needs minimum 4 runs before it can detect anomalies
+  # - anomaly score for row_count < default:
+  #     name: Row count has no unusual spike or drop

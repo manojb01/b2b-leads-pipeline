@@ -1,0 +1,21 @@
+name: 'swacchh'
+version: '1.0.0'
+profile: 'swacchh'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  swacchh:
+    staging:
+      +materialized: view
+      +schema: staging
+    prod:
+      +materialized: table
+      +schema: prod

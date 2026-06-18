@@ -1,0 +1,8 @@
+apache-airflow-providers-http
+apache-airflow-providers-amazon
+apache-airflow-providers-snowflake
+h3
+astronomer-cosmos
+dbt-snowflake
+soda-core-snowflake
+osmnx

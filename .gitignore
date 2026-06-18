@@ -1,0 +1,29 @@
+# Astro / Airflow
+astro
+.env
+airflow_settings.yaml
+airflow-webserver.pid
+airflow.cfg
+airflow.db
+webserver_config.py
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# dbt
+include/dbt/swacchh/target/
+include/dbt/swacchh/logs/
+include/dbt/swacchh/.user.yml
+include/dbt/swacchh/dbt_packages/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
